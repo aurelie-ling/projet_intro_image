@@ -50,20 +50,6 @@ void histogramme(Mat image,int hist[], int taille){
     
 }
 
-//histogramme cumulé 
-void histoCumule(double cumule[],int hist[],int taille,Mat img){
-     for(int i =0 ; i < taille; i++){
-        cumule[i]=0;
-    }
-    for(int i =0; i < taille; i++){
-        
-        for(int j=0; j <i ;  j++){
-            cumule[i]+=hist[j];
-        }
-        cumule[i]=cumule[i]/(img.rows*img.cols);
-    }
-}
-
 int max1(int tab[], int taille){
 
     int max=tab[0];
@@ -85,80 +71,10 @@ void afficheTab(int tab[]){
 
 }
 
-//afficher une tableau double 
-void afficheTab(double tab[]){
-
-     for( int i = 0 ; i < 256 ; i ++){
-        //cout << " tab "<< i <<" : " <<tab[i]<<endl;
-        cout<<tab[i]<<endl;
-    }
-
-}
-
-
-int max2(int tab[], int taille){
-
-    int max=tab[0];
-    int m=0;
-    int i=255;
-    bool choix =true;
-    while(choix){
-        if(tab[i]!=0){
-            m=i;
-            choix=false;
-        }
-        i--;
-    }
 
 
 
-   /* for (int i = 0 ; i < taille ; i ++){
-        if(max <tab[i]){
-            max =tab[i];
-            m=i;
-        }
 
-    }
-    */
-    return m;
-}
-int minImage (int tab[], int taille, int tailleImage){
-
-    int min=tailleImage;
-    int m =0;
-    bool  choix=true;
-    int i =0;
-    while(choix){
-
-        if(tab[i]!=0){
-            m=i;
-            choix=false;
-        }
-        i++;
-
-    }
-/*
-    for (int i = 0 ; i < taille ; i ++){
-        if(tab[i]!=0){
-            if(min >tab[i]){
-                min=tab[i];
-                m=i;
-        }
-        }
-        
-
-    }
-    */
-    return m;
-}
-
-int somme( int hist [],int taille){
-    int res=0;
-    for( int i =0; i < taille; i++){
-        res+=hist[i];
-    }
-    return res;
-}
 
 //Convolution 
 /*
@@ -187,56 +103,99 @@ Mat  convolution(Mat img,float matrice[][], int taille){
 
 
 
-// cumuluation d'un tableau de probabilite avec le debut et la fin du calcul
-double cumulation(double prob[], int debut, int fin){
-    double res=0;
-    for(debut; debut <=fin;++debut){
-        res+=prob[debut];
-    }
-   
-    return res;
+
+
+
+
+Mat  CC(Mat img){
+     Mat labelImage(img.size(), CV_32S);
+ 
+            // nombre de CC dans l'image seuillage
+             int nLabels = connectedComponents(img, labelImage,4);
+            
+        
+            // fixer la couleur pour chaque CC
+            std::vector<Vec3b> colors(nLabels);
+             colors[0] = Vec3b(0, 0, 0);//background
+             for (int label = 1; label < nLabels; ++label) {
+             colors[label] = Vec3b((rand() & 255), (rand() & 255), (rand() & 255));
+             }
+             Mat dst(img.size(), CV_8UC3);
+            for (int r = 0; r < dst.rows; ++r) {
+                  for (int c = 0; c < dst.cols; ++c) {
+
+                   int label = labelImage.at<int>(r, c);
+                     Vec3b& pixel = dst.at<Vec3b>(r, c);
+                     pixel = colors[label];
+                 }
+             }
+
+        return dst;
 
 }
-
-
-// Faire une somme 
-
-double somme(double w[],int debut,int fin){
-    double res=0;
-    for(debut; debut <=fin;++debut){
-        res+=w[debut];
-    }
-
-    return res;
-}
-
-
-
-//trouver le minimum du tableau 
-double minimum(double varIntrClass[], int taille){
-  double min = varIntrClass[0];
-  int indice=0;
-
-    for(int i =0 ; i < taille;++i){
-        if(varIntrClass[i]<min){
-            min =varIntrClass[i];
-            indice=i;
+int maxTab(int tab[], int n){
+    int max=tab[0];
+    for(int i=0; i<n;i++){
+        if(max<tab[i]){
+            max=tab[i];
         }
     }
+    return max;
+}
 
-    return indice;
+int minTab(int tab[],int n){
+    int min = maxTab(tab,n),max=maxTab(tab,n);
 
+   // cout<<"min : "<<min<<endl;
+    for(int i =0 ; i < n ; i++){
+        if(min>tab[i] && tab[i]!=0){
+            min=tab[i];
+        }
+    }
+    return max-min;
+}
+
+int debut(int tab[],int n,int m){
+    int debut=tab[0];
+    bool choix=true;
+    int i=0;
+    while(choix && i< n){
+        if(tab[i]!=0 && tab[i]>m){
+            debut=i;
+           // cout<<tab[i]<<" tab debut"<<endl;
+            choix=false;
+            break;
+        }
+        i++;
+    }
+    return debut;
+}
+int fin(int tab[],int n,int m){
+    int fin=tab[0];
+    bool choix=true;
+    int i=n-1;
+    while(choix && i>0){
+        if(tab[i]!=0 && tab[i]>m){
+            fin=i;
+            choix=false;
+            break;
+        }
+        i--;
+    }
+    return fin;
 }
 
 
-int main(){
+
+int main(){  
     /*******************avoir une image ************************/
     Mat img ;
-   // img = imread("/home/aurelie/Images/projet image/image5.png",IMREAD_COLOR);
+    //img = imread("/home/aurelie/Images/projet image/Image2.png",IMREAD_COLOR);
  //  img = imread("/home/aurelie/Images/projet image/image2.jpg",IMREAD_COLOR);
-    img = imread("/home/aurelie/Images/projet image/Image7.png",IMREAD_COLOR);
+   //img = imread("/home/aurelie/Images/projet image/Image4.jpg",IMREAD_COLOR);
+     img = imread("/home/aurelie/Images/img.jpg",IMREAD_COLOR);
     imshow("image",img);
-   //waitKey(0);
+  
     /**************Avoir une image en niveau de gris ****************/
     Mat nivGris(img.size(),CV_8UC1);
     for(int i =0 ; i < img.rows; i++){
@@ -249,117 +208,163 @@ int main(){
     }
    imshow("Niveau de gris",nivGris);
     // waitKey(0);
-   /***************convolution*******************/
-    Mat H_gradient;
-    Mat kernelH(1, 3, CV_32F);
-    kernelH.at<float>(0,0) = 1.0f;
-    kernelH.at<float>(0,1) = 0.0f;
-    kernelH.at<float>(0,2) = -1.0f;
-
-    cv::Mat kernelH2(3, 1, CV_32F);
-    kernelH2.at<float>(0,0) = 1.0f;
-    kernelH2.at<float>(1,0) = 0.0f;
-    kernelH2.at<float>(2,0) = -1.0f;
-    filter2D( nivGris, H_gradient, -1 , kernelH2, Point( -1, -1 ), 0, BORDER_DEFAULT );
-    //filter2D( egal, egal, -1 , kernelH, Point( -1, -1 ), 0, BORDER_DEFAULT );
-    //imshow("kernel",kernelH2);
-   // namedWindow( "filter2D Demo", CV_WINDOW_AUTOSIZE );
-    imshow( "filter2D Demo",H_gradient );
-  //  imshow( "filter2D Demo",nivGris);
-    //waitKey(0);
    
-   /************Histogramme et histogramme cumuler*********/
-   int his[256];
-   histogramme(nivGris,his,256);
-   double cumule[256];
-   histoCumule(cumule,his,256,nivGris);
 
-    /*******************Egalisation*******************/ 
-    Mat egal=Mat::zeros(img.size(),CV_8UC1);
-    //cvtColor(img,img,COLOR_BGR2GRAY);
-    //equalizeHist(img,egal);
-    //equalizeHist(nivGris,egal);
-  /*  int max=max2(his,256);
-    int min=minImage(his,256,img.rows*img.cols);
+   /*********************contour de l'image **************************/
 
-    Mat newImage(img.size(),CV_8UC1);
-    for(int i=0; i < nivGris.rows; i++){
-        for(int j=0; j<nivGris.cols; j++){
-            egal.at<uchar>(i,j)=((256-1)/img.rows*img.cols)*cumule[(int) (nivGris.at<uchar>(i,j))];
-            newImage.at<uchar>(i,j)=(int)((nivGris.at<uchar>(i,j)- min)*255/(max-min));
+   Mat dst;
+    Canny(img, dst, 50, 200, 3);
+    imshow("canny",dst);
+
+    waitKey(0); 
+
+
+    /*******************detection du verre **********************/
+
+
+    // detect the contours on the binary image using cv2.CHAIN_APPROX_NONE
+vector<vector<Point>> contours;
+vector<Vec4i> hierarchy;
+
+findContours(/*~thresh*/dst, contours, hierarchy, RETR_TREE, CHAIN_APPROX_NONE);
+// draw contours on the original image
+Mat image_copy = img.clone();
+Mat clone=Mat::zeros(img.size(),CV_8UC3);
+
+drawContours(image_copy, contours, -1, Scalar(0, 255, 0), 2);
+drawContours(clone, contours, -1, Scalar(0, 255, 0), 2);
+
+imshow("clone",clone);
+waitKey(0);
+
+/***********************taille du verre ***************************/
+
+int haut=0,bas=0,gauche=0,droite=0;
+int mLigne=0,mColonne=0;
+int tabligne[img.rows], tabcolonne[img.cols];
+Mat Lignes=Mat::zeros(img.size(),CV_8UC1);
+Mat Colonnes=Mat::zeros(img.size(),CV_8UC1);
+for(int i=0; i < img.rows; i++){
+    int lignes=0;
+    for(int j=0; j < img.cols;j++){
+        if(clone.at<Vec3b>(i,j)[0]==0 && clone.at<Vec3b>(i,j)[1]==255&&clone.at<Vec3b>(i,j)[2]==0){
+            lignes++;
         }
+
     }
-*/
-    cvtColor(img,img,COLOR_BGR2GRAY);
-    equalizeHist(img,egal);
-
-    //imshow("Egalisation",egal);
-    //imshow("Normalisation",newImage);
-   // waitKey(0);
     
+    tabligne[i]=lignes;
+    //cout<<lignes<<"\t";
+    for(int x=0; x <lignes;x++){
+        Lignes.at<uchar>(i,x)=255;
+    }
+}
+//cout<<endl;
+for(int i=0; i < img.cols; i++){
+    int colonne=0;
+    for(int j=0; j < img.rows;j++){
+        if(clone.at<Vec3b>(j,i)[0]==0 && clone.at<Vec3b>(j,i)[1]==255&&clone.at<Vec3b>(j,i)[2]==0){
+            colonne++;
+        }
 
-    /************Histogramme****************/ 
-    int hist [256];
+    }
+
+    tabcolonne[i]=colonne;
+    //cout<<colonne<<"\t";
+    for(int x=0; x <colonne;x++){
+        Colonnes.at<uchar>(x,i)=255;
+    }
+}
+//cout<<endl;
+
+
+mLigne=minTab(tabligne,img.rows)/4;
+mColonne=minTab(tabcolonne,img.cols)/4;
+//cout<<mLigne<< " "<<mColonne<<endl;
+
+haut=debut(tabligne,img.rows,mLigne);
+bas=fin(tabligne,img.rows,mLigne);
+gauche=debut(tabcolonne,img.cols,mColonne);
+droite=fin(tabcolonne,img.cols,mColonne);
+cout<<" haut : "<<haut<<" , bas : "<<bas<<", gauche : "<<gauche<<",droite : "<<droite<<endl;
+
+
+
+imshow("lignes",Lignes);
+imshow("Colonnes",Colonnes);
+waitKey(0);
+
+
+/************le contour du verre**********************/
+Mat verre=Mat::zeros(img.size(),CV_8UC1);
+for(int i= haut; i < bas ; i++){
+    for(int j = gauche ; j < droite; j++ ){
+        if(clone.at<Vec3b>(i,j)[1]==255){
+            verre.at<uchar>(i,j)=255;
+        }
+        
+    }
+}
+
+imshow("verre",verre);
+
+waitKey(0);
+
+
+    /********************overture et fermeture************************/
     
-    histogramme(nivGris,hist,256);
-  // histogramme(egal,hist,256);
-   //histogramme(newImage,hist,256);
-   //afficheTab(hist);
-
-    int m = max1(hist,256);
-   
-    
-
-  
-
-  /***************Seuillage ******************/
-    //Seuillage 
-    Mat imgSeuil(img.size(),CV_8UC3);
+    Mat dilatation=Mat::zeros(verre.size(),CV_8UC1);
  
-
-    //for(int i =0; i< 256; i=i+20){
-      //  cout<<i<<endl;
-       
-        Mat aidecontour=Mat::zeros(img.size(),CV_8UC1);
-       
-       //cout<<aide.rows<<endl;
-        int i=128;
-        //threshold(nivGris,aide,i,255,THRESH_BINARY);
-       // threshold(egal,aide,seuil,256,THRESH_BINARY);
-       
-        threshold(H_gradient,aidecontour,0,256,THRESH_OTSU);
-       
-
-       
-     
-        imshow("aide contour",aidecontour);
-        //waitKey(0);
-        //string c = "seuillage à "+to_string(i);
-       //imshow(c,aide);
-        //waitKey(0);
-    //}
+    dilate(/* c*//*aidecontour*/verre,dilatation,Mat(),Point(-1,-1),3);
+    erode(dilatation,dilatation,Mat(),Point(-1,-1),2);
+    imshow("dilat",dilatation);
+    dilatation.convertTo(dilatation,CV_8UC1);
+    
+    //cout<<dilatation.type()<<endl;
     /**************les lignes ****************/
+
+
    
-    Mat lcontour=Mat::zeros(img.size(),CV_8UC1);
-    Mat rcontour=Mat::zeros(img.size(),CV_8UC3);
+    Mat lcontour=Mat::zeros(verre.size(),CV_8UC1);
+    Mat rcontour=Mat::zeros(verre.size(),CV_8UC3);
   
    
-   
+    Mat milieu=dilatation.clone();
 
-    /*******************Contour *******************/
-    for(int i=0; i < img.rows;i++){
+    for(int i=0; i < dilatation.rows;i++){
+        for(int j=0; j<gauche; j++){
+            milieu.at<uchar>(i,j)=0;
+            milieu.at<uchar>(i,j+gauche+(droite-gauche))=0;
+
+        }
+
+    }
+    imshow("milieu",milieu);
+    /*******************histo projection entre intervalle *******************/
+   // cout<<"img.cols"<<verre.cols<<"\n"<<verre.cols/2-50<<" "<<verre.cols/2+50<<endl;
+  
+     int g=verre.cols/2-40,d=verre.cols/2+40;
+     if((droite-gauche/2)>40){
+            g=gauche+(droite-gauche)/2-40;
+            d=droite;
+
+     }
+ 
+    for(int i=0; i < verre.rows;i++){
         int blanc=0;
-        for(int j=0; j < img.cols;j++){
-            if(aidecontour.at<uchar>(i,j)==255){
+        for(int j=g; j < d;j++){
+            if(/*aidecontour*/dilatation.at<uchar>(i,j)==255){
            // if(erode.at<uchar>(i,j)==255){
                 blanc++;
             }
         }
+        
+       // cout<<"blanc  : "<<blanc<<endl;
         //contour filtre pour img.cols/8
         //egalisation img.cols/3
-        if(blanc>img.cols/8){
+        if(blanc>50){
 
-            for(int j=0; j<img.cols;j++){
+            for(int j=0; j<verre.cols;j++){
                 rcontour.at<Vec3b>(i,j)[0]=255;
                 rcontour.at<Vec3b>(i,j)[1]=255;
                 rcontour.at<Vec3b>(i,j)[2]=255;
@@ -377,14 +382,106 @@ int main(){
 
     }
 
+
     imshow("avoir blanccontour",lcontour);
     imshow("avoir traitecontour",rcontour);
     //waitKey(0);
 
-  
     waitKey(0);
 
-    ifstream image_file("/home/aurelie/Images/projet image/image7.json");
+    /**********les lignes *******************/
+    vector<int> lignes;
+    for( int i =1 ; i < verre.rows-1; i++){
+        if(i!=0 || i!=verre.rows){   
+       
+                if(rcontour.at<uchar>(i-1,0)==0 && rcontour.at<uchar>(i,0)==255 && rcontour.at<uchar>(i+1,0)==255){
+                    lignes.push_back(i);
+                }
+
+                if(rcontour.at<uchar>(i-1,0)==255 && rcontour.at<uchar>(i,0)==255 && rcontour.at<uchar>(i+1,0)==0){
+                    lignes.push_back(i);
+                }
+        }
+            
+    }
+   /* cout<<" size tab lignes : " <<lignes.size()<<endl;
+    for(int i = 0; i < lignes.size(); i++ ){
+        cout<<lignes[i]<<endl;
+    }*/
+
+    vector<int> nLignes;
+    vector<int> newLignes;
+    for( int i =0 ; i < lignes.size()-1; i=i+2){
+        if(lignes[i+1]-lignes[i]>1 && (i+1)<lignes.size()){
+            
+            nLignes.push_back(lignes[i]);
+            nLignes.push_back(lignes[i+1]);
+            //cout<<lignes[i]<<" "<<lignes[i+1]<<endl;
+        }
+
+    }
+   for(int i=0; i < nLignes.size();i=i+2){
+        if(i+1<nLignes.size()){
+             newLignes.push_back(nLignes[i+1]-nLignes[i]);
+        }
+       
+
+    }
+
+  /*  cout<<"new lignes : "<<newLignes.size()<<endl;
+     for(int i = 0; i < newLignes.size(); i++ ){
+        cout<<newLignes[i]<<endl;
+    }*/
+    int maxLigneblanc=0;
+    if(newLignes.size()>2){
+         maxLigneblanc=newLignes[1];
+    }
+    int indice=0;
+   
+    for(int i = 1; i < newLignes.size()-1; i++){
+        //if(i+1<newLignes.size()-1){
+        if(maxLigneblanc<newLignes[i] /*&&newLignes[i]>nLignes[i+1]*/  ){
+                maxLigneblanc=newLignes[i];
+                indice=i;
+        }
+        //}
+        
+    }
+    if(indice==0){
+        if(newLignes.size()>=3){
+            indice=1;
+        }
+    }
+    cout<<"max ligne blanc dans le milieu eau : "<<maxLigneblanc<<" , indice : "<<indice<<endl;
+    float tailleVerre=nLignes[(nLignes.size()-1)]-nLignes[0];
+    float tailleEau=0;
+    cout<<"taille du verre : "<<tailleVerre<<endl;
+     // tailleEau=newLignes[(newLignes.size()-2)]*100/tailleVerre;
+    if(maxLigneblanc==0){
+        cout<<"soit le verre est remplir ou il est vide"<<endl;
+    }else{
+        for(int i = nLignes[indice*2] ; i< nLignes[nLignes.size()-2];i++){
+            for(int j=gauche; j < droite; j++){
+                verre.at<uchar>(i,j)=155;
+                //cout<<"color"<<endl;    
+            }
+
+        }
+        tailleEau=(nLignes[nLignes.size()-2]-nLignes[indice*2])*100/tailleVerre;
+
+    }
+    
+    for(int j=0; j < verre.cols;j++){
+        verre.at<uchar>(haut,j)=90;
+        verre.at<uchar>(bas,j)=90;
+    }
+
+    cout<<"taille eau : "<<tailleEau<<endl;
+    imshow("verre avec l'eau",verre);
+    waitKey(0);
+    /****************Vérité terrain*****************/
+
+    ifstream image_file("/home/aurelie/Images/projet image/image8.json");
     string ligne;
     vector<string> v1;
    
@@ -436,7 +533,7 @@ int main(){
         int x2=v4[i+2]
         int y2=v4[i+3]*/
         line(rcontour,Point(v4[i],v4[i+1]),Point(v4[i+2],v4[i+3]),Scalar(0,255,0),1,LINE_4);
-       
+     
 
     }
 
