@@ -191,10 +191,11 @@ int main(){
     /*******************avoir une image ************************/
     Mat img ;
     //img = imread("/home/aurelie/Images/projet image/Image2.png",IMREAD_COLOR);
- //  img = imread("/home/aurelie/Images/projet image/image2.jpg",IMREAD_COLOR);
-   //img = imread("/home/aurelie/Images/projet image/Image4.jpg",IMREAD_COLOR);
-     img = imread("/home/aurelie/Images/img.jpg",IMREAD_COLOR);
+     //img = imread("/home/aurelie/Images/projet image/image2.jpg",IMREAD_COLOR);
+   img = imread("/home/aurelie/Images/projet image/Image4.jpg",IMREAD_COLOR);
+     //img = imread("/home/aurelie/Images/i2.png",IMREAD_COLOR);
     imshow("image",img);
+    cout<<" ligne : "<<img.rows<<",colonne : "<<img.cols<<endl;
   
     /**************Avoir une image en niveau de gris ****************/
     Mat nivGris(img.size(),CV_8UC1);
@@ -334,7 +335,10 @@ waitKey(0);
     for(int i=0; i < dilatation.rows;i++){
         for(int j=0; j<gauche; j++){
             milieu.at<uchar>(i,j)=0;
-            milieu.at<uchar>(i,j+gauche+(droite-gauche))=0;
+            if((j+gauche+(droite-gauche))<dilatation.cols){
+                milieu.at<uchar>(i,j+gauche+(droite-gauche))=0;
+            }
+            
 
         }
 
@@ -342,14 +346,18 @@ waitKey(0);
     imshow("milieu",milieu);
     /*******************histo projection entre intervalle *******************/
    // cout<<"img.cols"<<verre.cols<<"\n"<<verre.cols/2-50<<" "<<verre.cols/2+50<<endl;
-  
+    cout<<"avant g et d "<<endl;
      int g=verre.cols/2-40,d=verre.cols/2+40;
+     cout<<g <<" "<<d<<endl; 
      if((droite-gauche/2)>40){
-            g=gauche+(droite-gauche)/2-40;
+            if((gauche+(droite-gauche)/2-40)>0){
+                g=gauche+(droite-gauche)/2-40;  
+            }
+            
             d=droite;
 
      }
- 
+     cout<<g <<" "<<d<<endl; 
     for(int i=0; i < verre.rows;i++){
         int blanc=0;
         for(int j=g; j < d;j++){
@@ -456,13 +464,14 @@ waitKey(0);
     float tailleVerre=nLignes[(nLignes.size()-1)]-nLignes[0];
     float tailleEau=0;
     cout<<"taille du verre : "<<tailleVerre<<endl;
+    cvtColor(verre,verre,COLOR_GRAY2RGB);
      // tailleEau=newLignes[(newLignes.size()-2)]*100/tailleVerre;
     if(maxLigneblanc==0){
         cout<<"soit le verre est remplir ou il est vide"<<endl;
     }else{
         for(int i = nLignes[indice*2] ; i< nLignes[nLignes.size()-2];i++){
             for(int j=gauche; j < droite; j++){
-                verre.at<uchar>(i,j)=155;
+                verre.at<Vec3b>(i,j)[0]=255;
                 //cout<<"color"<<endl;    
             }
 
@@ -472,8 +481,8 @@ waitKey(0);
     }
     
     for(int j=0; j < verre.cols;j++){
-        verre.at<uchar>(haut,j)=90;
-        verre.at<uchar>(bas,j)=90;
+        verre.at<Vec3b>(haut,j)[2]=255;
+        verre.at<Vec3b>(bas,j)[2]=255;
     }
 
     cout<<"taille eau : "<<tailleEau<<endl;
@@ -532,13 +541,13 @@ waitKey(0);
         int y1=v4[i+1]
         int x2=v4[i+2]
         int y2=v4[i+3]*/
-        line(rcontour,Point(v4[i],v4[i+1]),Point(v4[i+2],v4[i+3]),Scalar(0,255,0),1,LINE_4);
+        line(verre,Point(v4[i],v4[i+1]),Point(v4[i+2],v4[i+3]),Scalar(0,255,0),1,LINE_4);
      
 
     }
 
 
-    imshow("avoir traitecontour",rcontour);
+    imshow("verre avec l'eau",verre);
      waitKey(0);
 
   //Egaliser ou normalier l'image
