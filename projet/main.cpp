@@ -490,7 +490,7 @@ waitKey(0);
     waitKey(0);
     /****************Vérité terrain*****************/
 
-    ifstream image_file("/home/aurelie/Images/projet image/image8.json");
+    ifstream image_file("/home/aurelie/Images/projet image/Image4.json");
     string ligne;
     vector<string> v1;
    
